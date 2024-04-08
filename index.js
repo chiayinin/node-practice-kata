@@ -28,6 +28,10 @@ const requestListenner = (request, response) => {
     } catch(error) {
       errorHandle(res);
     }
+  }else{
+    response.writeHead(404, headers);
+    response.write("Not found.");
+    response.end();
   }
 };
 
