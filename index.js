@@ -43,15 +43,21 @@ const requestListenner = (request, response) => {
 
         todos.push(userTodo);
         response.writeHead(200, headers);
-        response.write(JSON.stringify({
-          "status": "success",
-          "data": todos
-        }));
+        response.write(JSON.stringify(successMsg));
         response.end();
       } catch {
         errorHandle(response)
       }
-    })
+    });
+  }else if(request.url === '/todos' && request.method === 'DELETE') {
+    try{
+      todos.length = 0;
+      response.writeHead(200, headers);
+      response.write(JSON.stringify(successMsg));
+      response.end();
+    }catch {
+      errorHandle(response);
+    }
   }else if(request.method === 'OPTIONS') {
     response.writeHead(200, headers);
     response.end();
