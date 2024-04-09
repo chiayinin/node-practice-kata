@@ -7,17 +7,18 @@ const headers = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "PATCH, POST, GET, OPTIONS, DELETE",
   "Content-Type": "application/json",
-}
+};
 let todos = [
   {
     title: "刷刷牙",
     id: uuidv4(),
   }
-]
+];
+let body = '';
 const successMsg = {
   "status": "success",
   "data": todos,
-}
+};
 
 const requestListenner = (request, response) => {
   if(request.url === '/todos' && request.method === 'GET') {
@@ -26,11 +27,34 @@ const requestListenner = (request, response) => {
       response.write(JSON.stringify(successMsg));
       response.end();
     } catch(error) {
-      errorHandle(res);
+      errorHandle(response);
     }
-  }else{
+  }else if(request.url === '/todos' && request.method === 'POST') {
+    request.on('data', (chunk) => {
+      body += chunk;
+    });
+    request.on('end', () => {
+      try {
+        const title = JSON.parse(body).title;
+        const userTodo = {
+          "title": title,
+          "id": uuidv4()
+        };
+
+        todos.push(userTodo);
+        response.writeHead(200, headers);
+        response.write(JSON.stringify({
+          "status": "success",
+          "data": todos
+        }));
+        response.end();
+      } catch {
+        errorHandle(response)
+      }
+    })
+  }else {
     response.writeHead(404, headers);
-    response.write("Not found.");
+    response.write("Not found 404.");
     response.end();
   }
 };
