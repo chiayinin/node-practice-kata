@@ -52,6 +52,9 @@ const requestListenner = (request, response) => {
         errorHandle(response)
       }
     })
+  }else if(request.method === 'OPTIONS') {
+    response.writeHead(200, headers);
+    response.end();
   }else {
     response.writeHead(404, headers);
     response.write("Not found 404.");
