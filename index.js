@@ -45,6 +45,25 @@ const requestListenner = (request, response) => {
         errorHandle(response, request.method)
       }
     });
+  }else if(request.url.startsWith('/todos/') && request.method === 'PATCH') {
+    request.on('end', () => {
+      try{
+        const todo = JSON.parse(body).title;
+        const id = request.url.split('/').pop();
+        const index = todos.findIndex(item => item.id == id);
+
+        if(todo !== undefined && index !== -1) {
+          todos[index].title = todo;
+          response.writeHead(200, headers);
+          response.write(JSON.stringify(successMsg));
+          response.end();
+        }else {
+          errorHandle(response, request.method);
+        }
+      }catch{
+        errorHandle(response, request.method);
+      }
+    })
   }else if(request.url === '/todos' && request.method === 'DELETE') {
     try{
       todos.length = 0;
