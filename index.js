@@ -8,31 +8,27 @@ const headers = {
   "Access-Control-Allow-Methods": "PATCH, POST, GET, OPTIONS, DELETE",
   "Content-Type": "application/json",
 };
-let todos = [
-  {
-    title: "刷刷牙",
-    id: uuidv4(),
-  }
-];
-let body = '';
+let todos = [];
 const successMsg = {
   "status": "success",
   "data": todos,
 };
 
 const requestListenner = (request, response) => {
+  let body = '';
+
+  request.on('data', (chunk) => {
+    body += chunk;
+  });
   if(request.url === '/todos' && request.method === 'GET') {
     try {
       response.writeHead(200, headers);
       response.write(JSON.stringify(successMsg));
       response.end();
     } catch(error) {
-      errorHandle(response);
+      errorHandle(response, request.method);
     }
   }else if(request.url === '/todos' && request.method === 'POST') {
-    request.on('data', (chunk) => {
-      body += chunk;
-    });
     request.on('end', () => {
       try {
         const title = JSON.parse(body).title;
@@ -46,7 +42,7 @@ const requestListenner = (request, response) => {
         response.write(JSON.stringify(successMsg));
         response.end();
       } catch {
-        errorHandle(response)
+        errorHandle(response, request.method)
       }
     });
   }else if(request.url === '/todos' && request.method === 'DELETE') {
@@ -56,7 +52,23 @@ const requestListenner = (request, response) => {
       response.write(JSON.stringify(successMsg));
       response.end();
     }catch {
-      errorHandle(response);
+      errorHandle(response, request.method);
+    }
+  }else if(request.url.startsWith('/todos/') && request.method === 'DELETE') {
+    try{
+      const id = request.url.split('/').pop();
+      const index = todos.findIndex(item => item.id == id);
+
+      if(index !== -1) {
+        todos.splice(index, 1);
+        response.writeHead(200, headers);
+        response.write(JSON.stringify(successMsg));
+        response.end();
+      }else {
+        errorHandle(response, request.method);
+      }
+    }catch {
+      errorHandle(response, request.method);
     }
   }else if(request.method === 'OPTIONS') {
     response.writeHead(200, headers);

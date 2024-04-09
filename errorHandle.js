@@ -9,7 +9,8 @@ const errorMsg = {
   "message": "欄位未填寫正確，或無此 todo id。"
 }
 
-export function errorHandle(res) {
+export function errorHandle(res, method) {
+  errorMsg.method = method;
   res.writeHead(400, headers);
   res.write(JSON.stringify(errorMsg));
   res.end();
